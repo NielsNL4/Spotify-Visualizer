@@ -10,9 +10,63 @@
         padding: 0;
         box-sizing: border-box;
       }
+
+      #container {
+        position: relative;
+      }
+      #container canvas, #overlay {
+        position: absolute;
+      }
+      canvas {
+        border: 1px solid black;
+      }
+      #overlay{
+        width: 100%;
+        height: 100%;
+        /* padding-top: 42%;
+        padding-right: 40%;
+        padding-left: 40% */
+        padding: auto;
+      }
+      .pause-button{
+        position: relative;
+        max-width: 50px;
+        left: 50%;
+        margin-left: -75px;
+
+      }
+      .paused-button{
+        position: relative;
+        max-width: 50px;
+        left: 50%;
+        margin-left: -75px;
+
+      }
+      .skip-button-right{
+        max-width: 50px;
+        float: right;
+      }
+      .skip-button-left{
+        max-width: 50px;
+        float: left;
+        -webkit-transform: scaleX(-1);
+        transform: scaleX(-1);
+      }
+
     </style>
   </head>
   <body>
+    <div id="container">
+      <canvas id="Canvas"></canvas>
+      <div id="overlay">
+        <div id="buttons">
+          <img id="skip-button" class="skip-button-right" src="https://nielsnl4.stackstorage.com/public-share/uxXXrtpWmxqCvs8/preview?path=%2F&mode=thumbnail&size=medium&CSRF-Token=uAVqOZc0ynA7gsykM1Zxuw">
+          <img id="previous-button" class="skip-button-left" src="https://nielsnl4.stackstorage.com/public-share/uxXXrtpWmxqCvs8/preview?path=%2F&mode=thumbnail&size=medium&CSRF-Token=uAVqOZc0ynA7gsykM1Zxuw">
+          <!-- <img id="pause-button" class="pause-button" src="https://nielsnl4.stackstorage.com/public-share/h3IkhYnqids7Bgf/preview?path=%2F&mode=thumbnail&size=medium&CSRF-Token=uAVqOZc0ynA7gsykM1Zxuw"> -->
+          <!-- <img id="paused-button" class="paused-button" src="https://nielsnl4.stackstorage.com/public-share/jujRgxWNlO9Rl5y/preview?path=%2F&mode=thumbnail&size=medium&CSRF-Token=uAVqOZc0ynA7gsykM1Zxuw"> -->
+        </div>
+      </div>
+    </div>
     <noscript>Oops! JavaScript is required to run this page.</noscript>
   </body>
 </html>

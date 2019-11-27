@@ -1,6 +1,6 @@
 import Observe from '../util/observe'
 import * as cookies from '../util/cookie'
-import { get } from '../util/network'
+import { get, post, put } from '../util/network'
 import interpolate from '../util/interpolate'
 import { scaleLog } from 'd3-scale'
 import { min } from 'd3-array'
@@ -15,7 +15,7 @@ import ease from '../util/easing'
 export default class Sync {
   constructor ({
     volumeSmoothing = 100,
-    pingDelay = 1000
+    pingDelay = 0
   } = {}) {
     const accessToken = cookies.get('SPOTIFY_ACCESS_TOKEN')
     const refreshToken = cookies.get('SPOTIFY_REFRESH_TOKEN')
@@ -25,6 +25,10 @@ export default class Sync {
         currentlyPlaying: 'https://api.spotify.com/v1/me/player',
         trackAnalysis: 'https://api.spotify.com/v1/audio-analysis/',
         trackFeatures: 'https://api.spotify.com/v1/audio-features/',
+        skipTrack: 'https://api.spotify.com/v1/me/player/next/',
+        previousTrack: 'https://api.spotify.com/v1/me/player/previous/',
+        pauseTrack: 'https://api.spotify.com/v1/me/player/pause/',
+        playTrack: 'https://api.spotify.com/v1/me/player/play/',
         tokens: {
           accessToken,
           refreshToken,
@@ -45,10 +49,14 @@ export default class Sync {
         sections: {}
       }),
       albumArt: {},
-      previousSong: {},
+      lastSong: {},
       currentlyPlaying: {},
       trackAnalysis: {},
       trackFeatures: {},
+      skipTrack: {},
+      previousTrack: {},
+      pauseTrack: {},
+      playTrack: {},
       initialTrackProgress: 0,
       initialStart: 0,
       trackProgress: 0,
@@ -169,7 +177,7 @@ export default class Sync {
     var lastSong = this.state.currentlyPlaying
     if (lastSong != data.item) {
       lastSong = data.item
-      this.state.previousSong = this.state.currentlyPlaying
+      this.state.lastSong = this.state.currentlyPlaying
     }
 
     this.state.currentlyPlaying = data.item
@@ -189,6 +197,46 @@ export default class Sync {
     }
 
     this.ping()
+  }
+
+  async skipCurrentPlayback (){
+    try{
+      const { data } = await post(this.state.api.skipTrack, this.state.api.tokens.accessToken)
+    } catch ({ status }) {
+      if (status === 401) {
+        return this.getNewToken()
+      }
+    }
+  }
+
+  async previousCurrentPlayback (){
+    try{
+      const { data } = await post(this.state.api.previousTrack, this.state.api.tokens.accessToken)
+    } catch ({ status }) {
+      if (status === 401) {
+        return this.getNewToken()
+      }
+    }
+  }
+
+  async pauseCurrentPlayback (){
+    try{
+      const { data } = await put(this.state.api.pauseTrack, this.state.api.tokens.accessToken)
+    } catch ({ status }) {
+      if (status === 401) {
+        return this.getNewToken()
+      }
+    }
+  }
+
+  async resumeCurrentPlayback (){
+    try{
+      const { data } = await put(this.state.api.playTrack, this.state.api.tokens.accessToken)
+    } catch ({ status }) {
+      if (status === 401) {
+        return this.getNewToken()
+      }
+    }
   }
 
   /**
@@ -273,12 +321,16 @@ export default class Sync {
     return this.state.active === true
   }
 
+  get activeState () {
+    return this.state.active
+  }
+
   get previousTrack () {
-    return this.state.previousSong
+    return this.state.lastSong
   }
 
   get previousAlbumCover (){
-    return this.state.previousSong.album.images[0].url
+    return this.state.lastSong.album.images[0].url
   }
 
   get albumCover () {
@@ -311,6 +363,22 @@ export default class Sync {
 
   get section () {
     return this.state.activeIntervals.sections
+  }
+
+  get skipSong (){
+    this.skipCurrentPlayback()
+  }
+
+  get previousSong (){
+    this.previousCurrentPlayback()
+  }
+
+  get pauseSong (){
+    this.pauseCurrentPlayback()
+  }
+
+  get playSong (){
+    this.resumeCurrentPlayback()
   }
 
   /**

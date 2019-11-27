@@ -51,3 +51,63 @@ export function get (url, {
     request.send()
   })
 }
+
+export function post (url, token) {
+  return new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest
+    request.open('POST', url)
+    request.setRequestHeader('Accept', 'application/json');
+    request.setRequestHeader('Content-Type', 'application/json');
+    request.setRequestHeader("Authorization", 'Bearer ' + token)
+    const error = () => {
+      const response = createResponse(request)
+      response.success = false
+      response.error = request.responseText
+      reject(response)
+    }
+
+    request.onload = () => {
+      if (request.status >= 200 && request.status < 400) {
+        const response = createResponse(request)
+        response.success = true
+        resolve(response)
+      }
+
+      if (request.status >= 400) error(request)
+    }
+
+    request.onerror = () => error(request)
+
+    request.send()
+  })
+}
+
+export function put (url, token) {
+  return new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest
+    request.open('PUT', url)
+    request.setRequestHeader('Accept', 'application/json');
+    request.setRequestHeader('Content-Type', 'application/json');
+    request.setRequestHeader("Authorization", 'Bearer ' + token)
+    const error = () => {
+      const response = createResponse(request)
+      response.success = false
+      response.error = request.responseText
+      reject(response)
+    }
+
+    request.onload = () => {
+      if (request.status >= 200 && request.status < 400) {
+        const response = createResponse(request)
+        response.success = true
+        resolve(response)
+      }
+
+      if (request.status >= 400) error(request)
+    }
+
+    request.onerror = () => error(request)
+
+    request.send()
+  })
+}

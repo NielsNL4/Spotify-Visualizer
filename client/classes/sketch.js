@@ -1,10 +1,10 @@
 /**
- * @class Sketch - a simple 2d <canvas> animation interface. 
+ * @class Sketch - a simple 2d <canvas> animation interface.
  */
 export default class Sketch {
   constructor ({
     main = null,
-    container = document.body,
+    container = document.getElementById('container'),
     width = window.innerWidth,
     height = window.innerHeight,
     hidpi = true,
@@ -17,10 +17,12 @@ export default class Sketch {
     this.active = false
     this.queue = []
     this.fill = fill
-    this.canvas = document.createElement('canvas')
+    this.canvas = document.getElementById('Canvas')
     this.ctx = this.canvas.getContext('2d')
     this.container.appendChild(this.canvas)
-    this.offscreenCanvas = document.createElement('canvas')
+    var overlay = document.getElementById('overlay')
+    this.container.appendChild(overlay)
+    this.offscreenCanvas = document.getElementById('Canvas')
     this.offscreen = this.offscreenCanvas.getContext('2d')
     this.setSize()
 
@@ -55,21 +57,21 @@ export default class Sketch {
     this.canvas.height = this.height * dpi
     this.canvas.style.width = this.width + 'px'
     this.canvas.style.height = this.height + 'px'
-    this.ctx.scale(dpi, dpi) 
+    this.ctx.scale(dpi, dpi)
 
     this.offscreenCanvas.width = this.width * dpi
     this.offscreenCanvas.height = this.height * dpi
     this.offscreen.scale(dpi, dpi)
   }
-  
+
   /**
    * @method add – Add an item to the animation queue.
-   * 
+   *
    * NOTE: If duration is specified, the item will remove itself from the queue upon completion.
-   * 
-   * @param {string} name 
-   * @param {function} method 
-   * @param {number} duration 
+   *
+   * @param {string} name
+   * @param {function} method
+   * @param {number} duration
    */
   add (name, method, duration = null) {
     this.queue.push({
@@ -82,7 +84,7 @@ export default class Sketch {
 
   /**
    * @method remove - Remove an item from the animation queue by name.
-   * @param {string} name 
+   * @param {string} name
    */
   remove (name) {
     this.queue = this.queue.filter(item => item.name !== name)
@@ -108,8 +110,8 @@ export default class Sketch {
 
   /**
    * @method paint - Paint a single item in the animation queue.
-   * @param {DOMHighResTimeStamp} now  
-   * @param {object} - Item in the animation queue. 
+   * @param {DOMHighResTimeStamp} now
+   * @param {object} - Item in the animation queue.
    */
   paint (now, { name, start, duration, method }) {
     const elapsed = now - start
@@ -145,10 +147,10 @@ export default class Sketch {
     }
   }
 
-  loop (now) { 
-    if (this.active === true) {
-      requestAnimationFrame(this.loop.bind(this))
-    }
+  loop (now) {
+
+    requestAnimationFrame(this.loop.bind(this))
+
 
     this.queue.forEach(item => this.paint(now, item))
   }
