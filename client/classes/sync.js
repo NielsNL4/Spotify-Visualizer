@@ -15,7 +15,7 @@ import ease from '../util/easing'
 export default class Sync {
   constructor ({
     volumeSmoothing = 100,
-    pingDelay = 0
+    pingDelay = 1000
   } = {}) {
     const accessToken = cookies.get('SPOTIFY_ACCESS_TOKEN')
     const refreshToken = cookies.get('SPOTIFY_REFRESH_TOKEN')
@@ -29,6 +29,11 @@ export default class Sync {
         previousTrack: 'https://api.spotify.com/v1/me/player/previous/',
         pauseTrack: 'https://api.spotify.com/v1/me/player/pause/',
         playTrack: 'https://api.spotify.com/v1/me/player/play/',
+        shuffleOn: "https://api.spotify.com/v1/me/player/shuffle?state=true",
+        shuffleOff: "https://api.spotify.com/v1/me/player/shuffle?state=false",
+        repeatContext: 'https://api.spotify.com/v1/me/player/repeat?state=context',
+        repeatOff: 'https://api.spotify.com/v1/me/player/repeat?state=off',
+        repeatTrack: 'https://api.spotify.com/v1/me/player/repeat?state=track',
         tokens: {
           accessToken,
           refreshToken,
@@ -48,6 +53,8 @@ export default class Sync {
         bars: {},
         sections: {}
       }),
+      currentPlaylist: {},
+      currentPlaylistName: {},
       albumArt: {},
       lastSong: {},
       currentlyPlaying: {},
@@ -57,11 +64,18 @@ export default class Sync {
       previousTrack: {},
       pauseTrack: {},
       playTrack: {},
+      shuffleOn: {},
+      shuffleOff: {},
+      repeatContext: {},
+      repeatOff: {},
+      repeatTrack: {},
       initialTrackProgress: 0,
       initialStart: 0,
       trackProgress: 0,
       active: false,
       initialized: false,
+      shuffleStatus: false,
+      repeatStatus: {},
       volumeSmoothing,
       volume: 0,
       queues: {
@@ -180,6 +194,16 @@ export default class Sync {
       this.state.lastSong = this.state.currentlyPlaying
     }
 
+    this.state.shuffleStatus = data.shuffle_state
+
+    if(data.context != null){
+      this.state.api.currentPlaylist = data.context.href
+      this.getPlaylistName()
+    }
+
+    this.state.repeatStatus = data.repeat_state
+
+
     this.state.currentlyPlaying = data.item
     this.state.trackAnalysis = analysis
     this.state.trackFeatures = features
@@ -235,6 +259,69 @@ export default class Sync {
     } catch ({ status }) {
       if (status === 401) {
         return this.getNewToken()
+      }
+    }
+  }
+
+  async getPlaylistName (){
+    try{
+      const { data } = await get(this.state.api.currentPlaylist, { headers: this.state.api.headers })
+      this.state.api.currentPlaylistName = data.name
+    } catch ({ status }) {
+      if (status === 401) {
+        return this.getNewToken()
+      }else if (status === 502 || status === 503){
+      }
+    }
+  }
+
+  async toggleShuffle (bool){
+    if (bool == true){
+      try{
+        const { data } = await put(this.state.api.shuffleOn, this.state.api.tokens.accessToken)
+      }catch ({ status }) {
+        if (status === 401) {
+          return this.getNewToken()
+        }
+      }
+    }else{
+      try{
+        const { data } = await put(this.state.api.shuffleOff, this.state.api.tokens.accessToken)
+      }catch ({ status }) {
+        if (status === 401) {
+          return this.getNewToken()
+        }
+      }
+    }
+  }
+
+  async toggleRepeat(){
+    if (this.state.repeatStatus == 'off') {
+      this.state.repeatStatus = 'context'
+      try {
+        const { data } = await put(this.state.api.repeatContext, this.state.api.tokens.accessToken)
+      } catch ({ status }) {
+        if (status === 401) {
+          return this.getNewToken()
+        }
+      }
+    }else if (this.state.repeatStatus == 'context') {
+      this.state.repeatStatus = 'track'
+      try {
+        const { data } = await put(this.state.api.repeatTrack, this.state.api.tokens.accessToken)
+      } catch ({ status }) {
+        if (status === 401) {
+          return this.getNewToken()
+        }
+      }
+    }else if (this.state.repeatStatus == 'track') {
+      this.state.repeatStatus = 'off'
+      try {
+        const { data } = await put(this.state.api.repeatOff, this.state.api.tokens.accessToken)
+      } catch ({ status }) {
+        if (status === 401) {
+          return this.getNewToken()
+        }
       }
     }
   }
@@ -379,6 +466,26 @@ export default class Sync {
 
   get playSong (){
     this.resumeCurrentPlayback()
+  }
+
+  set shuffle(bool){
+    this.toggleShuffle(bool)
+  }
+
+  get repeat(){
+    this.toggleRepeat()
+  }
+
+  get currentRepeatStatus(){
+    return this.state.repeatStatus
+  }
+
+  get currentShuffleStatus (){
+    return this.state.shuffleStatus
+  }
+
+  get playlistName (){
+    return this.state.api.currentPlaylistName
   }
 
   /**

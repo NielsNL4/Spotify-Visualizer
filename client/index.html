@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Spotify Viz</title>
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+    <link href="https://use.fontawesome.com/releases/v5.0.7/css/all.css" rel="stylesheet">
     <style>
       *, *:before, *:after {
         margin: 0;
@@ -27,6 +28,10 @@
         padding-right: 40%;
         padding-left: 40% */
         padding: auto;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
       }
       .pause-button{
         position: relative;
@@ -40,17 +45,82 @@
         max-width: 50px;
         left: 50%;
         margin-left: -75px;
-
       }
-      .skip-button-right{
-        max-width: 50px;
+
+      input[type=checkbox] {
+        visibility: hidden;
+      }
+
+      .fa-backward {
+        color: white;
+        cursor: pointer;
+        transition: all 0.15s linear;
+        font-size: 30px;
+      }
+
+      .fa-forward {
+        color: white;
+        cursor: pointer;
+        transition: all 0.15s linear;
+        font-size: 30px;
+      }
+
+      .fa-backward:hover {
+        color: #CCC;
+        transition: all 0.15s linear;
+      }
+
+      .fa-forward:hover {
+        color: #CCC;
+        transition: all 0.15s linear;
+      }
+
+      .fa-random{
+        font-size: 20px;
+        cursor: pointer;
+        transition: all 0.15s linear;
+      }
+
+      .fa-random:hover{
+        color: #CCC;
+      }
+
+      .fa-redo-alt{
+        font-size: 20px;
+        cursor: pointer;
+        transition: all 0.15s linear;
+      }
+
+      #shuffle-button {
+        float: left;
+        z-index: 10;
+        font-size: 20px;
+        cursor: pointer;
+        transition: all 0.15s linear;
+      }
+
+      #skip-buttons{
+        height: 10px;
+      }
+
+      #repeat-button {
+        z-index: 10;
+      }
+
+      #skip-button{
         float: right;
       }
-      .skip-button-left{
-        max-width: 50px;
+      #previous-button{
         float: left;
-        -webkit-transform: scaleX(-1);
-        transform: scaleX(-1);
+      }
+
+      #repeatSpan{
+        float: left;
+        position: absolute;
+      }
+
+      #skipButton{
+        z-index: 100;
       }
 
     </style>
@@ -60,8 +130,12 @@
       <canvas id="Canvas"></canvas>
       <div id="overlay">
         <div id="buttons">
-          <img id="skip-button" class="skip-button-right" src="https://nielsnl4.stackstorage.com/public-share/uxXXrtpWmxqCvs8/preview?path=%2F&mode=thumbnail&size=medium&CSRF-Token=uAVqOZc0ynA7gsykM1Zxuw">
-          <img id="previous-button" class="skip-button-left" src="https://nielsnl4.stackstorage.com/public-share/uxXXrtpWmxqCvs8/preview?path=%2F&mode=thumbnail&size=medium&CSRF-Token=uAVqOZc0ynA7gsykM1Zxuw">
+          <input type="checkbox" id="shuffle-button" ><span id="shuffleSpan" class="fas fa-random"></span></input>
+          <input type="checkbox" id="repeat-button" ><span id="repeatSpan" class="fas fa-redo-alt"></span></input>
+          <div id="skip-buttons">
+            <span id="skip-button" class="fas fa-forward"></span>
+            <span id="previous-button" class="fas fa-backward"></span>
+          </div>
           <!-- <img id="pause-button" class="pause-button" src="https://nielsnl4.stackstorage.com/public-share/h3IkhYnqids7Bgf/preview?path=%2F&mode=thumbnail&size=medium&CSRF-Token=uAVqOZc0ynA7gsykM1Zxuw"> -->
           <!-- <img id="paused-button" class="paused-button" src="https://nielsnl4.stackstorage.com/public-share/jujRgxWNlO9Rl5y/preview?path=%2F&mode=thumbnail&size=medium&CSRF-Token=uAVqOZc0ynA7gsykM1Zxuw"> -->
         </div>

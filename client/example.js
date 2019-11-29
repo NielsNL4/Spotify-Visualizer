@@ -9,22 +9,31 @@ export default class Example extends Visualizer {
     this.theme = ['#FFF']
 
     this.buttonBar = document.getElementById('buttons')
+    this.skipButtons = document.getElementById('skip-buttons')
+
+    this.shuffleButton = document.getElementById('shuffle-button')
+    this.shuffleSpan = document.getElementById("shuffleSpan")
+
+    this.repeatButton = document.getElementById('repeat-button')
+    this.repeatSpan = document.getElementById('repeatSpan')
 
     var self = this
+    this.shuffle = false
     this.skipButton = document.getElementById("skip-button")
     this.skipButton.addEventListener("click", function() { self.sync.skipSong }, false);
 
-    this.skipButton = document.getElementById("previous-button")
-    this.skipButton.addEventListener("click", function() { self.sync.previousSong }, false);
+    this.prevButton = document.getElementById("previous-button")
+    this.prevButton.addEventListener("click", function() { self.sync.previousSong }, false);
 
-    this.pauseButton = document.getElementById('pause-button')
-    this.pauseButton.addEventListener("click", function() { self.sync.pauseSong }, false);
+    this.shuffleSpan.addEventListener('click', function () {
+        self.sync.shuffle = !self.shuffle
+        self.shuffle = !self.shuffle
+    })
 
-    this.pausedButton = document.getElementById('paused-button')
-    this.pauseButton.addEventListener("click", function() { self.sync.playSong }, false);
+    this.repeatSpan.addEventListener('click', function () {
+        self.sync.repeat
+    })
   }
-
-
 
   hooks () {
     this.sync.on('bar', beat => {
@@ -45,15 +54,42 @@ export default class Example extends Visualizer {
     this.marginLR = window.innerWidth / 2 - 320 + 160
 
     this.buttonBar.style.marginTop = this.marginTop+'px'
-    this.buttonBar.style.marginRight = this.marginLR+'px'
-    this.buttonBar.style.marginLeft = this.marginLR+'px'
 
-    if (this.sync.activeState == true){
-      this.pausedButton.style.display = 'none'
-      this.pauseButton.style.display = 'inline'
-    }else if(this.sync.activeState == false){
-      this.pauseButton.style.display = 'none'
-      this.pausedButton.style.display = 'inline'
+    this.skipButtons.style.marginRight = this.marginLR+'px'
+    this.skipButtons.style.marginLeft = this.marginLR+'px'
+
+    this.shuffleButton.style.marginLeft = this.marginLR-100+'px'
+
+    var repeatMargin = this.repeatSpan.style.marginLeft = 420+'px'
+
+    if (this.shuffle){
+      this.shuffleButton.checked = true
+      this.shuffleSpan.style.color = '#1dd15d'
+    }
+    if (!this.shuffle){
+      this.shuffleButton.checked = false
+      this.shuffleSpan.style.color = 'white'
+    }
+
+    if (this.sync.currentRepeatStatus == 'off') {
+      this.repeatSpan.style.color = 'white'
+      this.repeatSpan.style.padding = null
+      this.repeatSpan.style.borderRadius = null
+      this.repeatSpan.style.background = null
+      this.repeatSpan.style.marginTop = null
+      this.repeatSpan.style.marginLeft = repeatMargin
+    }if (this.sync.currentRepeatStatus == 'context') {
+      this.repeatSpan.style.color = '#1dd15d'
+      this.repeatSpan.style.padding = null
+      this.repeatSpan.style.borderRadius = null
+      this.repeatSpan.style.background = null
+    }if (this.sync.currentRepeatStatus == 'track') {
+      this.repeatSpan.style.color = '#1dd15d'
+      this.repeatSpan.style.padding = '5px'
+      this.repeatSpan.style.borderRadius = '30px'
+      this.repeatSpan.style.background = 'white'
+      this.repeatSpan.style.marginTop = '-5px'
+      this.repeatSpan.style.marginLeft = '415px'
     }
 
     var img = new Image
@@ -64,76 +100,34 @@ export default class Example extends Visualizer {
     ctx.drawImage(img, 0, 0 - offset, width, width)
     ctx.filter = 'none';
 
+    ctx.save()
     ctx.shadowBlur = 10;
     ctx.shadowColor = "white";
 
+    ctx.lineWidth = beat / 10 + 3
 
-    // ctx.lineWidth = beat / 10 + 3
-    ctx.lineWidth = 3
-
-    var audioData = [bar, beat, tatum, segment, section]
-
-
-
-
-    // ctx.strokeStyle = interpolateRgb(swatches[0].getHex(), swatches[0].getHex())(this.sync.section.progress)
-    // sin(ctx, now / 50000, height / 2, section * 2, 40)
-    // ctx.stroke()
-
-    // ctx.strokeStyle = interpolateRgb(swatches[1].getHex(), swatches[1].getHex())(this.sync.bar.progress)
-    // sin(ctx, now / 500000, height / 2, bar * 2, 38)
-    // ctx.stroke()
-    //
-    // ctx.strokeStyle = interpolateRgb(swatches[2].getHex(), swatches[2].getHex())(this.sync.segment.progress)
-    // sin(ctx, now / 5000000, height / 2, segment * 2, 35)
-    // ctx.stroke()
-    //
-    // ctx.strokeStyle = interpolateRgb(swatches[3].getHex(), swatches[3].getHex())(this.sync.tatum.progress)
-    // sin(ctx, now / 5000000, height / 2, tatum * 2, 40)
-    // ctx.stroke()
-    var volume = 1
-
-    if (!this.sync.activeState) {
-      if (volume > 0){
-        volume -= 0.005
-      }
-    } else if (this.sync.activeState) {
-      if (volume < 1){
-        volume += 0.01
-      }
-    }
-    ctx.strokeStyle = interpolateRgb(['#FFF'], ["#FFF"])(volume * this.sync.beat.progress)
-    sin(ctx, now / 4000, height / 2, volume * beat * 0.8, 40)
+    ctx.strokeStyle = interpolateRgb(['#FFF'], ["#FFF"])(this.sync.beat.progress)
+    sin(ctx, now / 4000, height / 2,beat * 0.8, 40)
     ctx.stroke()
 
-    // var newAmount = scaleAmount.reverse()
-    //
-    // for (const amount of newAmount){
-    //   ctx.fillRect(startX, startY, 10, (beat / 255.0) * -1 * height * amount + 10)
-    //   startX += 15
-    //   console.log(amount);
-    // }
-
-    // startX += 120
-    // ctx.fillRect(startX, startY, 100, (beat / 255.0) * -1 * height * 0.5 + 10)
-    // startX += 120
-    // ctx.fillRect(startX, startY, 100, (beat / 255.0) * -1 * height * 0.7 + 10)
-    // startX += 120
-    // ctx.fillRect(startX, startY, 100, (beat / 255.0) * -1 * height * 1 + 10)
-    // startX += 120
-    // ctx.fillRect(startX, startY, 100, (beat / 255.0) * -1 * height * 1.3 + 10)
-    // startX += 120
-    // ctx.fillRect(startX, startY, 100, (beat / 255.0) * -1 * height * 1 + 10)
-    // startX += 120
-    // ctx.fillRect(startX, startY, 100, (beat / 255.0) * -1 * height * 0.7 + 10)
-    // startX += 120
-    // ctx.fillRect(startX, startY, 100, (beat / 255.0) * -1 * height * 0.5 + 10)
-
-    ctx.shadowBlur = 0;
-
-    ctx.filter = 'drop-shadow(0,0,0,black)'
     ctx.drawImage(img, width / 2 - 290, height / 2 - 290, 580, 580)
     ctx.filter = 'none'
+    //
+    // if(this.sync.playlistName != null){
+    //   var txt = this.sync.playlistName
+    //   ctx.font = '40px Roboto'
+    //   ctx.shadowColor = "black";
+    //   ctx.shadowBlur = 7;
+    //   ctx.shadowOffsetX = 4;
+    //   ctx.shadowOffsetY = 4;
+    //   ctx.fillStyle = '#FFF'
+    //   ctx.fillText(txt, 15, 45)
+    //
+    // }
+
+    ctx.restore()
+
+
 
     ctx.font = "40px Roboto";
     var txt = this.sync.songName
