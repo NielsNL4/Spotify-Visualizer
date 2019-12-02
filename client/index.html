@@ -123,6 +123,28 @@
         z-index: 100;
       }
 
+      #buttons{
+        width: 100%;
+      }
+
+      progress{
+        -webkit-appearance: none;  /* Override default CSS styles */
+        appearance: none;
+        background: rgba(0,0,0,0);
+        outline: none;
+        width: 580px;
+        border-radius: 20px;
+        margin-top: -30px;
+        height: 5px;
+        float: left;
+        /* position: absolute; */
+      }
+
+      progress[value]::-webkit-progress-value {
+        background: #1dd15d;
+      }
+
+
     </style>
   </head>
   <body>
@@ -130,6 +152,7 @@
       <canvas id="Canvas"></canvas>
       <div id="overlay">
         <div id="buttons">
+          <progress class="slider" id="progressSlider"></progress>
           <input type="checkbox" id="shuffle-button" ><span id="shuffleSpan" class="fas fa-random"></span></input>
           <input type="checkbox" id="repeat-button" ><span id="repeatSpan" class="fas fa-redo-alt"></span></input>
           <div id="skip-buttons">
@@ -139,6 +162,7 @@
           <!-- <img id="pause-button" class="pause-button" src="https://nielsnl4.stackstorage.com/public-share/h3IkhYnqids7Bgf/preview?path=%2F&mode=thumbnail&size=medium&CSRF-Token=uAVqOZc0ynA7gsykM1Zxuw"> -->
           <!-- <img id="paused-button" class="paused-button" src="https://nielsnl4.stackstorage.com/public-share/jujRgxWNlO9Rl5y/preview?path=%2F&mode=thumbnail&size=medium&CSRF-Token=uAVqOZc0ynA7gsykM1Zxuw"> -->
         </div>
+
       </div>
     </div>
     <noscript>Oops! JavaScript is required to run this page.</noscript>

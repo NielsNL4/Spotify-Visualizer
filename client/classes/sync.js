@@ -72,6 +72,7 @@ export default class Sync {
       initialTrackProgress: 0,
       initialStart: 0,
       trackProgress: 0,
+      currentTrackProgress: 0,
       active: false,
       initialized: false,
       shuffleStatus: false,
@@ -140,6 +141,9 @@ export default class Sync {
         }
         return this.ping()
       }
+      // tick = window.performance.now()
+      // tock = window.performance.now() - tick
+      this.state.currentTrackProgress = data.progress_ms
       this.processResponse(data)
     } catch ({ status }) {
       if (status === 401) {
@@ -203,12 +207,13 @@ export default class Sync {
 
     this.state.repeatStatus = data.repeat_state
 
-
     this.state.currentlyPlaying = data.item
     this.state.trackAnalysis = analysis
     this.state.trackFeatures = features
     this.state.initialTrackProgress = data.progress_ms + tock
+
     this.state.trackProgress = data.progress_ms + tock
+
     this.state.initialStart = window.performance.now()
 
     if (this.state.initialized === false) {
@@ -406,6 +411,14 @@ export default class Sync {
    */
   get isActive () {
     return this.state.active === true
+  }
+
+  get progress(){
+    return this.state.currentTrackProgress
+  }
+
+  get trackLength(){
+    return this.state.trackFeatures.duration_ms
   }
 
   get activeState () {

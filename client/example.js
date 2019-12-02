@@ -8,6 +8,8 @@ export default class Example extends Visualizer {
     super({ volumeSmoothing: 10 })
     this.theme = ['#FFF']
 
+    this.progressBar = document.getElementById('progressSlider')
+
     this.buttonBar = document.getElementById('buttons')
     this.skipButtons = document.getElementById('skip-buttons')
 
@@ -43,12 +45,15 @@ export default class Example extends Visualizer {
   }
 
   paint ({ ctx, height, width, now }) {
-
     const bar = interpolateBasis([0, this.sync.volume * 100, 0])(this.sync.bar.progress)
     const beat = interpolateBasis([0, this.sync.volume * 250, 0])(this.sync.beat.progress)
     const tatum = interpolateBasis([0, this.sync.volume * 50, 0])(this.sync.tatum.progress)
     const segment = interpolateBasis([0, this.sync.volume * 100, 0])(this.sync.segment.progress)
     const section = interpolateBasis([0, this.sync.volume * 100, 0])(this.sync.section.progress)
+
+    this.progressBar.max = this.sync.trackLength
+    this.progressBar.value = this.sync.progress
+    console.log(this.progressBar.value);
 
     this.marginTop = window.innerHeight / 2 + 320
     this.marginLR = window.innerWidth / 2 - 320 + 160
@@ -60,7 +65,10 @@ export default class Example extends Visualizer {
 
     this.shuffleButton.style.marginLeft = this.marginLR-100+'px'
 
-    var repeatMargin = this.repeatSpan.style.marginLeft = 420+'px'
+    this.progressBar.style.marginLeft = width / 2 - 291+'px'
+    // this.progressBar.style.marginTop = -100+'px'
+
+    var repeatMargin = this.repeatSpan.style.marginLeft = 435+'px'
 
     if (this.shuffle){
       this.shuffleButton.checked = true
@@ -89,8 +97,9 @@ export default class Example extends Visualizer {
       this.repeatSpan.style.borderRadius = '30px'
       this.repeatSpan.style.background = 'white'
       this.repeatSpan.style.marginTop = '-5px'
-      this.repeatSpan.style.marginLeft = '415px'
+      this.repeatSpan.style.marginLeft = '430px'
     }
+
 
     var img = new Image
     img.src = this.sync.albumCover
@@ -104,15 +113,19 @@ export default class Example extends Visualizer {
     ctx.shadowBlur = 10;
     ctx.shadowColor = "white";
 
-    ctx.lineWidth = beat / 10 + 3
+    ctx.lineWidth = beat / 30 + 3
 
     ctx.strokeStyle = interpolateRgb(['#FFF'], ["#FFF"])(this.sync.beat.progress)
-    sin(ctx, now / 4000, height / 2,beat * 0.8, 40)
+    sin(ctx, now / 40000, height / 2,beat * 0.8 * -1, 40)
+    ctx.stroke()
+
+    ctx.strokeStyle = interpolateRgb(['#FFF'], ["#FFF"])(this.sync.beat.progress)
+    sin(ctx, now / 40000, height / 2,beat * 0.8, 40)
     ctx.stroke()
 
     ctx.drawImage(img, width / 2 - 290, height / 2 - 290, 580, 580)
     ctx.filter = 'none'
-    //
+
     // if(this.sync.playlistName != null){
     //   var txt = this.sync.playlistName
     //   ctx.font = '40px Roboto'
@@ -122,12 +135,9 @@ export default class Example extends Visualizer {
     //   ctx.shadowOffsetY = 4;
     //   ctx.fillStyle = '#FFF'
     //   ctx.fillText(txt, 15, 45)
-    //
     // }
 
     ctx.restore()
-
-
 
     ctx.font = "40px Roboto";
     var txt = this.sync.songName
