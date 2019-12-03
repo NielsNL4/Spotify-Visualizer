@@ -6,34 +6,34 @@ const cookieParser = require('cookie-parser')
 const fallback = require('express-history-api-fallback')
 const compression = require('compression')
 
-const apps = express()
+const app = express()
 const root = path.resolve(__dirname, '../dist')
 const port = process.env.PORT || 8001
 
 if (process.env.NODE_ENV === 'development') {
-  apps.use((req, res, next) => {
+  app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', 'http://localhost:8080')
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
     next()
   })
 
-  apps.get('/', (req, res) => {
+  app.get('/', (req, res) => {
     res.redirect('http://localhost:8080')
   })
 }
 
-apps.use(cookieParser())
-apps.use(compression())
+app.use(cookieParser())
+app.use(compression())
 
 if (process.env.NODE_ENV === 'production') {
-  apps.use(express.static(root))
+  app.use(express.static(root))
 }
 
-apps.use('/auth', require('./routes/auth'))
-apps.use('/callback', require('./routes/callback'))
-apps.use('/login', require('./routes/login'))
-apps.use('/refresh', require('./routes/refresh'))
+app.use('/auth', require('./routes/auth'))
+app.use('/callback', require('./routes/callback'))
+app.use('/login', require('./routes/login'))
+app.use('/refresh', require('./routes/refresh'))
 
-apps.use(fallback('index.html', { root }))
+app.use(fallback('index.html', { root }))
 
-apps.listen(port, () => console.log('Listening on port ' + port))
+app.listen(port, () => console.log('Listening on port ' + port))

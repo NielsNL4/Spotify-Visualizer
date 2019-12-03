@@ -51,9 +51,11 @@ export default class Example extends Visualizer {
     const segment = interpolateBasis([0, this.sync.volume * 100, 0])(this.sync.segment.progress)
     const section = interpolateBasis([0, this.sync.volume * 100, 0])(this.sync.section.progress)
 
+    ctx.clearRect(0, 0, width, height);
+    ctx.beginPath()
+
     this.progressBar.max = this.sync.trackLength
     this.progressBar.value = this.sync.progress
-    console.log(this.progressBar.value);
 
     this.marginTop = window.innerHeight / 2 + 320
     this.marginLR = window.innerWidth / 2 - 320 + 160
@@ -65,7 +67,7 @@ export default class Example extends Visualizer {
 
     this.shuffleButton.style.marginLeft = this.marginLR-100+'px'
 
-    this.progressBar.style.marginLeft = width / 2 - 291+'px'
+    this.progressBar.style.marginLeft = width / 2 - 290+'px'
     // this.progressBar.style.marginTop = -100+'px'
 
     var repeatMargin = this.repeatSpan.style.marginLeft = 435+'px'
@@ -105,30 +107,29 @@ export default class Example extends Visualizer {
     img.src = this.sync.albumCover
 
     ctx.filter = 'blur(50px)';
-    var offset = width / 4
-    ctx.drawImage(img, 0, 0 - offset, width, width)
+    var offset = -350
+    ctx.drawImage(img, -20, offset, width + 50, width + 40)
     ctx.filter = 'none';
 
+    ctx.fillStyle = 'rgba(0,0,0,0.2)'
+    ctx.fillRect(0, 0, width, height);
+
     ctx.save()
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = "white";
+    // ctx.shadowBlur = 10;
+    // ctx.shadowColor = "white";
 
-    ctx.lineWidth = beat / 30 + 3
+    // ctx.lineWidth = beat / 30 + 3
+    // ctx.strokeStyle = interpolateRgb(['#FFF'], ["#FFF"])(this.sync.beat.progress)
+    // sin(ctx, now / 40000, height / 2,beat * 0.8 * -1, 40)
+    // ctx.stroke()
 
-    ctx.strokeStyle = interpolateRgb(['#FFF'], ["#FFF"])(this.sync.beat.progress)
-    sin(ctx, now / 40000, height / 2,beat * 0.8 * -1, 40)
-    ctx.stroke()
-
-    ctx.strokeStyle = interpolateRgb(['#FFF'], ["#FFF"])(this.sync.beat.progress)
-    sin(ctx, now / 40000, height / 2,beat * 0.8, 40)
-    ctx.stroke()
 
     ctx.drawImage(img, width / 2 - 290, height / 2 - 290, 580, 580)
     ctx.filter = 'none'
 
     // if(this.sync.playlistName != null){
     //   var txt = this.sync.playlistName
-    //   ctx.font = '40px Roboto'
+    //   ctx.font = '40px Montserrat regular'
     //   ctx.shadowColor = "black";
     //   ctx.shadowBlur = 7;
     //   ctx.shadowOffsetX = 4;
@@ -139,7 +140,7 @@ export default class Example extends Visualizer {
 
     ctx.restore()
 
-    ctx.font = "40px Roboto";
+    ctx.font = "40px Montserrat regular";
     var txt = this.sync.songName
 
     document.title = this.sync.songName + ' by ' + this.sync.artistName
@@ -150,7 +151,7 @@ export default class Example extends Visualizer {
     ctx.fillStyle = '#FFF'
     ctx.fillText(txt, width / 2 - 290 + 600, height / 2 - 280 + 30);
 
-    ctx.font = "30px Roboto";
+    ctx.font = "30px Montserrat regular";
     var txt = this.sync.artistName
 
     ctx.fillStyle = '#000'

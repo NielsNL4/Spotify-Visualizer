@@ -557,6 +557,7 @@ export default class Sync {
 }
 
 export async function auth () {
+  console.log(`${PROJECT_ROOT}`);
   const { data } = await get(`${PROJECT_ROOT}/auth`)
   window.location.href = `${PROJECT_ROOT}/login?auth_id=${data.auth_id}`
 }
