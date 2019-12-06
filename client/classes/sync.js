@@ -15,7 +15,7 @@ import ease from '../util/easing'
 export default class Sync {
   constructor ({
     volumeSmoothing = 100,
-    pingDelay = 1000
+    pingDelay = 500
   } = {}) {
     const accessToken = cookies.get('SPOTIFY_ACCESS_TOKEN')
     const refreshToken = cookies.get('SPOTIFY_REFRESH_TOKEN')
@@ -34,6 +34,7 @@ export default class Sync {
         repeatContext: 'https://api.spotify.com/v1/me/player/repeat?state=context',
         repeatOff: 'https://api.spotify.com/v1/me/player/repeat?state=off',
         repeatTrack: 'https://api.spotify.com/v1/me/player/repeat?state=track',
+        next: 'https://api.spotify.com/v1/me/tracks',
         tokens: {
           accessToken,
           refreshToken,
@@ -69,6 +70,7 @@ export default class Sync {
       repeatContext: {},
       repeatOff: {},
       repeatTrack: {},
+      next: {},
       initialTrackProgress: 0,
       initialStart: 0,
       trackProgress: 0,
@@ -77,6 +79,7 @@ export default class Sync {
       initialized: false,
       shuffleStatus: false,
       repeatStatus: {},
+      userSongs: {},
       volumeSmoothing,
       volume: 0,
       queues: {
@@ -84,9 +87,9 @@ export default class Sync {
         beat: []
       }
     })
-
     this.initHooks()
     this.ping()
+    this.getSavedSongs()
   }
 
   /**
@@ -127,6 +130,101 @@ export default class Sync {
       'Accept': 'application/json'
     }
     this.ping()
+  }
+
+
+  async getSavedSongs (){
+    try{
+        var bool = true;
+        var songs = []
+        var table = document.getElementById('userSongs')
+        while (table.firstChild) {
+          table.removeChild(table.firstChild);
+        }
+
+        function toMinutes(millis) {
+          var minutes = Math.floor(millis / 60000);
+          var seconds = ((millis % 60000) / 1000).toFixed(0);
+          return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
+        }
+
+        function addDots(string, limit)
+        {
+          var dots = "...";
+          if(string.length > limit)
+          {
+            string = string.substring(0,limit) + dots;
+          }
+
+            return string;
+        }
+
+        while (bool) {
+            const { data } = await get(this.state.api.next, { headers: this.state.api.headers })
+            songs.push(data.items)
+            this.state.api.next = data.next
+            for (var i = 0; i < data.items.length; i++) {
+              var row = table.insertRow(-1);
+
+              var heart = row.insertCell(0)
+              var songName = row.insertCell(1);
+              var artistName = row.insertCell(2);
+              var albumName = row.insertCell(3)
+              var date = row.insertCell(4)
+              var lenght = row.insertCell(5)
+
+              var artist = document.createElement('A')
+              artist.className = data.items[i].track.name.replace(/ /g,"_")
+              var album = document.createElement('A')
+              album.className = data.items[i].track.name.replace(/ /g,"_")
+              var label = document.createElement("LABEL");
+
+              label.className = 'fas fa-heart'
+              heart.style.paddingRight = '20px'
+              heart.style.paddingLeft = '20px'
+              heart.style.width = '50px'
+              heart.appendChild(label)
+
+              songName.innerHTML = addDots(data.items[i].track.name, 41)
+              songName.style.paddingRight = '10px'
+              songName.style.width = '500px';
+              songName.style.color = 'white'
+              songName.className = data.items[i].track.name.replace(/ /g,"_")
+
+              artist.innerHTML = addDots(data.items[i].track.artists[0].name, 16)
+              artist.setAttribute("href", data.items[i].track.artists[0].external_urls.spotify)
+              artist.setAttribute('target', '_blank')
+              artistName.appendChild(artist)
+              artistName.className = data.items[i].track.name.replace(/ /g,"_")
+
+              album.innerHTML = addDots(data.items[i].track.album.name, 16)
+              album.setAttribute("href", data.items[i].track.album.external_urls.spotify)
+              album.setAttribute('target', '_blank')
+              albumName.appendChild(album)
+              albumName.className = data.items[i].track.name.replace(/ /g,"_")
+
+              date.innerHTML = data.items[i].added_at.slice(0,10)
+              date.className = data.items[i].track.name.replace(/ /g,"_")
+
+              lenght.innerHTML = toMinutes(data.items[i].track.duration_ms)
+              lenght.style.width = '50px'
+              lenght.style.paddingRight = '20px'
+              lenght.className = data.items[i].track.name.replace(/ /g,"_")
+
+            }
+            if(this.state.api.next == null){
+              bool = false
+            }
+        }
+        this.state.userSongs = songs
+
+
+
+    }catch ({ status }){
+      if(status === 401){
+        return this.getNewToken()
+      }
+    }
   }
 
   /**
@@ -197,7 +295,6 @@ export default class Sync {
       lastSong = data.item
       this.state.lastSong = this.state.currentlyPlaying
     }
-
     this.state.shuffleStatus = data.shuffle_state
 
     if(data.context != null){
@@ -211,6 +308,30 @@ export default class Sync {
     this.state.trackAnalysis = analysis
     this.state.trackFeatures = features
     this.state.initialTrackProgress = data.progress_ms + tock
+
+    var name = data.item.name.replace(/ /g,"_")
+    var lastName = this.state.lastSong.name
+
+    if(lastName != null){ lastName = lastName.replace(/ /g,"_") }
+
+    var currentSongColor = document.getElementsByClassName(name);
+    var lastSongColor = document.getElementsByClassName(lastName)
+    if (currentSongColor != null) {
+      for (var i = 0; i < currentSongColor.length; i++) {
+        currentSongColor[i].style.color = '#1dd15d'
+        if(currentSongColor[i].children.lenght > 0){
+          currentSongColor[i].children[0].style.color = '#1dd15d'
+        }
+      }
+    }
+    if(lastSongColor != null){
+      for (var i = 0; i < lastSongColor.length; i++) {
+        lastSongColor[i].style.color = 'white'
+        if(lastSongColor[i].children.lenght > 0){
+          lastSongColor[i].children[0].style.color = '#1dd15d'
+        }
+      }
+    }
 
     this.state.trackProgress = data.progress_ms + tock
 
@@ -465,6 +586,10 @@ export default class Sync {
     return this.state.activeIntervals.sections
   }
 
+  get currentUserSongs (){
+    return this.state.userSongs
+  }
+
   get skipSong (){
     this.skipCurrentPlayback()
   }
@@ -549,7 +674,6 @@ export default class Sync {
     const sizeScale = scaleLog()
       .domain([min(queues.volume), average(queues.volume)])
       .range([0, 1])
-
     /** Average the beat queue, then pass it to our size scale. */
     const beat = average(queues.beat)
     this.volume = sizeScale(beat)

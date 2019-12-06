@@ -7,7 +7,7 @@ router.get('/', (req, res, next) => {
   const query = querystring.stringify({
     response_type: 'code',
     client_id: process.env.CLIENT_ID,
-    scope: 'user-read-playback-state user-modify-playback-state',
+    scope: 'user-library-read user-read-playback-state user-modify-playback-state',
     redirect_uri: process.env.REDIRECT_URI,
     state: auth_id
   })

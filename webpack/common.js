@@ -11,6 +11,7 @@ module.exports = {
     './client/index.js',
     './client/sass/main.scss'
   ],
+  target: 'node',
   module: {
     rules: [
       {

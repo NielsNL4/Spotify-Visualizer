@@ -1,4 +1,5 @@
 import Visualizer from './classes/visualizer'
+import ColorThief from '../node_modules/colorthief/dist/color-thief.mjs'
 import { interpolateRgb, interpolateBasis } from 'd3-interpolate'
 import { getRandomElement } from './util/array'
 import { sin, circle } from './util/canvas'
@@ -7,6 +8,14 @@ export default class Example extends Visualizer {
   constructor () {
     super({ volumeSmoothing: 10 })
     this.theme = ['#FFF']
+    this.currentCover = null
+    this.lastCover = null
+    this.rgb = null
+    this.googleProxyURL = 'https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=2592000&url=';
+
+    this.colorThief = new ColorThief();
+
+    this.coverDiv = document.getElementById('albumCover')
 
     this.progressBar = document.getElementById('progressSlider')
 
@@ -35,6 +44,7 @@ export default class Example extends Visualizer {
     this.repeatSpan.addEventListener('click', function () {
         self.sync.repeat
     })
+
   }
 
   hooks () {
@@ -54,6 +64,9 @@ export default class Example extends Visualizer {
     ctx.clearRect(0, 0, width, height);
     ctx.beginPath()
 
+    this.coverDiv.style.marginTop = height / 2 - 290+'px'
+    this.coverDiv.style.marginLeft = width / 2 - 290+'px'
+
     this.progressBar.max = this.sync.trackLength
     this.progressBar.value = this.sync.progress
 
@@ -67,7 +80,7 @@ export default class Example extends Visualizer {
 
     this.shuffleButton.style.marginLeft = this.marginLR-100+'px'
 
-    this.progressBar.style.marginLeft = width / 2 - 290+'px'
+    // this.progressBar.style.marginLeft = width / 2 - 290+'px'
     // this.progressBar.style.marginTop = -100+'px'
 
     var repeatMargin = this.repeatSpan.style.marginLeft = 435+'px'
@@ -102,41 +115,49 @@ export default class Example extends Visualizer {
       this.repeatSpan.style.marginLeft = '430px'
     }
 
-
-    var img = new Image
+    var img = new Image()
     img.src = this.sync.albumCover
+    this.lastCover = this.currentCover
 
-    ctx.filter = 'blur(50px)';
-    var offset = -350
-    ctx.drawImage(img, -20, offset, width + 50, width + 40)
-    ctx.filter = 'none';
+    this.coverDiv.src = this.googleProxyURL + img.src
+    this.coverDiv.crossOrigin = 'Anonymous';
 
-    ctx.fillStyle = 'rgba(0,0,0,0.2)'
+    // console.log(this.lastCover);
+
+    if(this.lastCover != this.sync.albumCover || this.rgb == null){
+        this.rgb = this.colorThief.getPalette(this.coverDiv, 2)
+    }
+
+    this.currentCover = this.sync.albumCover
+
+    // if(this.lastCover != this.sync.albumCover && this.lastCover != null){
+    //
+    //   console.log('hello');
+    // }
+    // this.lastCover = this.sync.albumCover
+
+    // console.log(rgb);
+    // ctx.filter = 'blur(50px)';
+    // var offset = -350
+    // ctx.drawImage(img, -100, offset, width+200, width)
+    // ctx.filter = 'none';
+    if(this.rgb != null){
+      var my_gradient = ctx.createLinearGradient(0, 0, 0, height / 2 + 200);
+      my_gradient.addColorStop(0, 'rgba('+this.rgb[0][0]+','+this.rgb[0][1]+','+this.rgb[0][2]+',1)');
+      my_gradient.addColorStop(1, 'rgba('+this.rgb[1][0]+','+this.rgb[1][1]+','+this.rgb[1][2]+',1)');
+      ctx.fillStyle = my_gradient
+    }
+
     ctx.fillRect(0, 0, width, height);
 
     ctx.save()
-    // ctx.shadowBlur = 10;
-    // ctx.shadowColor = "white";
 
-    // ctx.lineWidth = beat / 30 + 3
-    // ctx.strokeStyle = interpolateRgb(['#FFF'], ["#FFF"])(this.sync.beat.progress)
-    // sin(ctx, now / 40000, height / 2,beat * 0.8 * -1, 40)
-    // ctx.stroke()
+    ctx.lineWidth = beat / 30 + 3
+    ctx.strokeStyle = interpolateRgb(['#FFF'], ["#FFF"])(this.sync.beat.progress)
+    sin(ctx, now / 40000, height / 2,beat * 0.8 * -1, 40)
+    ctx.stroke()
 
-
-    ctx.drawImage(img, width / 2 - 290, height / 2 - 290, 580, 580)
     ctx.filter = 'none'
-
-    // if(this.sync.playlistName != null){
-    //   var txt = this.sync.playlistName
-    //   ctx.font = '40px Montserrat regular'
-    //   ctx.shadowColor = "black";
-    //   ctx.shadowBlur = 7;
-    //   ctx.shadowOffsetX = 4;
-    //   ctx.shadowOffsetY = 4;
-    //   ctx.fillStyle = '#FFF'
-    //   ctx.fillText(txt, 15, 45)
-    // }
 
     ctx.restore()
 

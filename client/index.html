@@ -2,9 +2,10 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Spotify Viz</title>
+    <title>Spotify Player</title>
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
     <link href="https://use.fontawesome.com/releases/v5.0.7/css/all.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
     <style>
       *, *:before, *:after {
         margin: 0;
@@ -12,8 +13,31 @@
         box-sizing: border-box;
       }
 
+      /* width */
+      ::-webkit-scrollbar {
+        width: 15px;
+      }
+
+      /* Track */
+      ::-webkit-scrollbar-track {
+        background: #1a1a1a;
+      }
+
+      /* Handle */
+      ::-webkit-scrollbar-thumb {
+        background: #555;
+        transition: 0.2s ease;
+      }
+
+      /* Handle on hover */
+      ::-webkit-scrollbar-thumb:hover {
+        background: #4a4a4a;
+        transition: 0.2s ease;
+      }
+
       #container {
         position: relative;
+        transition: margin-left .5s;
       }
       #container canvas, #overlay {
         position: absolute;
@@ -132,26 +156,193 @@
         appearance: none;
         background: rgba(0,0,0,0);
         outline: none;
-        width: 580px;
+        width: 100%;
         border-radius: 20px;
-        margin-top: -31px;
         height: 5px;
         float: left;
-        /* position: absolute; */
+        position: absolute;
       }
 
       progress[value]::-webkit-progress-value {
         background: #1dd15d;
       }
 
+      .sidenav {
+        height: 100%; /* 100% Full-height */
+        width: 0; /* 0 width - change this with JavaScript */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Stay on top */
+        top: 0; /* Stay at the top */
+        left: 0;
+        background-color: #111; /* Black*/
+        overflow-x: hidden; /* Disable horizontal scroll */
+        padding-top: 60px; /* Place content 60px from the top */
+        transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
+      }
+
+      /* The navigation menu links */
+      .sidenav a {
+        padding: 8px 8px 8px 32px;
+        text-decoration: none;
+        font-size: 25px;
+        color: #818181;
+        display: block;
+        transition: 0.3s;
+        font-family: Montserrat;
+      }
+
+      /* When you mouse over the navigation links, change their color */
+      .sidenav a:hover {
+        color: #f1f1f1;
+      }
+
+      .sidenav a:focus{
+        color: #1dd15d;
+      }
+
+      /* Position and style the close button (top right corner) */
+      .sidenav .closebtn {
+        position: absolute;
+        top: 0;
+        right: 25px;
+        font-size: 36px;
+        margin-left: 50px;
+      }
+
+      /* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
+      @media screen and (max-height: 450px) {
+        .sidenav {padding-top: 15px;}
+        .sidenav a {font-size: 18px;}
+      }
+
+      .fa-bars{
+        cursor: pointer;
+        position: absolute;
+        color: white;
+        font-size: 30px;
+        padding: 5px 8px;
+        margin: 20px;
+        background: black;
+      }
+
+      .liked-songs{
+
+      }
+
+      h1{
+        font-family: Montserrat;
+        font-weight: bold;
+      }
+
+      #likedSongs{
+        height: 100%;
+        width: 0;
+        position: fixed;
+        z-index: 1;
+        top: 0;
+        left: 0;
+        background-color: #1a1a1a;
+        overflow-x: hidden;
+        padding-top: 60px;
+        transition: 0.5s;
+        margin-left: 250px;
+        color: white;
+        -webkit-user-select: none; /* Safari */
+        -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* IE10+/Edge */
+        user-select: none; /* Standard */
+      }
+
+      #likedSongs td{
+        font-size: 15px;
+        padding: 10px 5px 10px 5px;
+        padding-right: 50px;
+        color: #d4d4d4;
+        width: 300px;
+        max-width: 400px;
+      }
+
+      #likedSongs a{
+        text-decoration: none;
+        padding-bottom: 2px;
+        transition: .2s ease;
+        color: white;
+      }
+
+      #likedSongs a:hover{
+        border-bottom-style: solid;
+        border-bottom-width: 2px;
+        transition: .2s ease;
+      }
+
+      #likedSongs th{
+        text-align: left;
+        font-size: 14px;
+        font-weight: lighter;
+        color: #adadad;
+        padding: 5px;
+      }
+
+      #likedSongs table, th, td {
+        border-bottom: 1px solid #404040;
+        border-collapse: collapse;
+      }
+
+      #likedSongs .song-title{
+        padding-right: 200px;
+      }
+
+      #likedSongs .empty{
+        padding-right: 20px;
+      }
+
+      #albumCover{
+        width: 580px;
+        height: 580px;
+        margin: auto;
+        background: #000;
+        position: absolute;
+      }
+
+      #albumCover{
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 1);
+      }
+
     </style>
   </head>
   <body>
+    <div id="mySidenav" class="sidenav">
+      <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+      <a href="javascript:void(0)" class="liked-songs" onclick="openLikedSongs()">Liked Songs</a>
+    </div>
+
+    <div id="likedSongs">
+      <h1>Liked Songs<h1>
+        <br>
+        <table>
+          <thead>
+            <tr>
+              <th class="empty"></th>
+              <th class="song-title">Title</th>
+              <th>Artist</th>
+              <th>Album</th>
+              <th><label class="fas fa-calendar-alt"></label></th>
+              <th><label class="far fa-clock"></label></th>
+            </tr>
+          </thead>
+          <tbody id='userSongs'>
+
+          </tbody>
+        </table>
+    </div>
+
     <div id="container">
       <canvas id="Canvas"></canvas>
       <div id="overlay">
+        <img id="albumCover"></img>
+        <span class="fas fa-bars" onclick="openNav()"></span>
+        <progress class="slider" id="progressSlider"></progress>
         <div id="buttons">
-          <progress class="slider" id="progressSlider"></progress>
           <input type="checkbox" id="shuffle-button" ><span id="shuffleSpan" class="fas fa-random"></span></input>
           <input type="checkbox" id="repeat-button" ><span id="repeatSpan" class="fas fa-redo-alt"></span></input>
           <div id="skip-buttons">
@@ -165,5 +356,24 @@
       </div>
     </div>
     <noscript>Oops! JavaScript is required to run this page.</noscript>
+    <script>
+      function openNav() {
+        document.getElementById("mySidenav").style.width = "250px";
+      }
+
+      function openLikedSongs(){
+        document.getElementById('likedSongs').style.width = 'calc(100% - 250px)';
+        document.getElementById('likedSongs').style.padding = '70px';
+        document.getElementById('likedSongs').style.marginLeft = '250px';
+      }
+
+      /* Set the width of the side navigation to 0 and the left margin of the page content to 0, and the background color of body to white */
+      function closeNav() {
+        document.getElementById("mySidenav").style.width = "0";
+        document.getElementById('likedSongs').style.width = '0';
+        document.getElementById('likedSongs').style.marginLeft = '0';
+        document.getElementById('likedSongs').style.padding = '0';
+      }
+    </script>
   </body>
 </html>
