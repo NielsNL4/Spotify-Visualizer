@@ -80,9 +80,6 @@ export default class Example extends Visualizer {
 
     this.shuffleButton.style.marginLeft = this.marginLR-100+'px'
 
-    // this.progressBar.style.marginLeft = width / 2 - 290+'px'
-    // this.progressBar.style.marginTop = -100+'px'
-
     var repeatMargin = this.repeatSpan.style.marginLeft = 435+'px'
 
     if (this.shuffle){
@@ -122,25 +119,12 @@ export default class Example extends Visualizer {
     this.coverDiv.src = this.googleProxyURL + img.src
     this.coverDiv.crossOrigin = 'Anonymous';
 
-    // console.log(this.lastCover);
-
     if(this.lastCover != this.sync.albumCover || this.rgb == null){
-        this.rgb = this.colorThief.getPalette(this.coverDiv, 2)
+        this.rgb = this.colorThief.getPalette(this.coverDiv, 10)
     }
 
     this.currentCover = this.sync.albumCover
 
-    // if(this.lastCover != this.sync.albumCover && this.lastCover != null){
-    //
-    //   console.log('hello');
-    // }
-    // this.lastCover = this.sync.albumCover
-
-    // console.log(rgb);
-    // ctx.filter = 'blur(50px)';
-    // var offset = -350
-    // ctx.drawImage(img, -100, offset, width+200, width)
-    // ctx.filter = 'none';
     if(this.rgb != null){
       var my_gradient = ctx.createLinearGradient(0, 0, 0, height / 2 + 200);
       my_gradient.addColorStop(0, 'rgba('+this.rgb[0][0]+','+this.rgb[0][1]+','+this.rgb[0][2]+',1)');
@@ -153,7 +137,7 @@ export default class Example extends Visualizer {
     ctx.save()
 
     ctx.lineWidth = beat / 30 + 3
-    ctx.strokeStyle = interpolateRgb(['#FFF'], ["#FFF"])(this.sync.beat.progress)
+    ctx.strokeStyle = interpolateRgb('rgba('+this.rgb[6][0]+','+this.rgb[6][1]+','+this.rgb[6][2]+',1)','rgba('+this.rgb[6][0]+','+this.rgb[6][1]+','+this.rgb[6][2]+',1')(this.sync.beat.progress)
     sin(ctx, now / 40000, height / 2,beat * 0.8 * -1, 40)
     ctx.stroke()
 
@@ -162,12 +146,18 @@ export default class Example extends Visualizer {
     ctx.restore()
 
     ctx.font = "40px Montserrat regular";
-    var txt = this.sync.songName
+    var txt = addDots(this.sync.songName, 20)
 
     document.title = this.sync.songName + ' by ' + this.sync.artistName
 
+    var rectWidth = ctx.measureText(txt).width + 20
+
+    if(rectWidth > 500){
+      rectWidth = 500
+    }
+
     ctx.fillStyle = '#000'
-    ctx.fillRect(width / 2 - 290 + 590, height / 2 - 290, ctx.measureText(txt).width + 20, 55)
+    ctx.fillRect(width / 2 - 290 + 590, height / 2 - 290, rectWidth, 55)
 
     ctx.fillStyle = '#FFF'
     ctx.fillText(txt, width / 2 - 290 + 600, height / 2 - 280 + 30);
@@ -184,4 +174,15 @@ export default class Example extends Visualizer {
     ctx.beginPath()
     ctx.fill()
   }
+}
+
+function addDots(string, limit)
+{
+  var dots = "...";
+  if(string.length > limit)
+  {
+    string = string.substring(0,limit) + dots;
+  }
+
+    return string;
 }

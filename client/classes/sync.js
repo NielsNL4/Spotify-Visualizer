@@ -82,6 +82,7 @@ export default class Sync {
       userSongs: {},
       volumeSmoothing,
       volume: 0,
+      artistObject: {},
       queues: {
         volume: [],
         beat: []
@@ -130,6 +131,17 @@ export default class Sync {
       'Accept': 'application/json'
     }
     this.ping()
+  }
+
+  async getArtist (id){
+    try{
+      const { data } = await get('https://api.spotify.com/v1/artists/' + id, { headers: this.state.api.headers })
+      console.log(data);
+    }catch(status){
+      if (status === 401) {
+        return this.getNewToken()
+      }
+    }
   }
 
 
@@ -192,7 +204,8 @@ export default class Sync {
               songName.className = data.items[i].track.name.replace(/ /g,"_")
 
               artist.innerHTML = addDots(data.items[i].track.artists[0].name, 16)
-              artist.setAttribute("href", data.items[i].track.artists[0].external_urls.spotify)
+              // artist.setAttribute("href", data.items[i].track.artists[0].external_urls.spotify)
+              artist.addEventListener('click', this.getArtist(data.items[i].track.artists[0].id))
               artist.setAttribute('target', '_blank')
               artistName.appendChild(artist)
               artistName.className = data.items[i].track.name.replace(/ /g,"_")

@@ -305,7 +305,32 @@
       }
 
       #albumCover{
-        box-shadow: 0px 0px 10px rgba(0, 0, 0, 1);
+        box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
+      }
+
+      #artist-page{
+        width: calc(100% - 250px);
+        margin-left: 250px;
+        background: #1a1a1a;
+      }
+
+      #artist-banner{
+        width: 100%;
+        height: 350px;
+        object-fit: cover;
+        object-position: 0% 20%;
+      }
+
+      #artist-name{
+        position: absolute;
+        font-weight: bold;
+        color: white;
+        font-size: 75px;
+      }
+
+      #artist-songs{
+
+        height: 80%;
       }
 
     </style>
@@ -334,6 +359,14 @@
 
           </tbody>
         </table>
+    </div>
+
+    <div id="artist-page">
+      <div id="artist-header">
+        <h1 id="artist-name">DROELOE<h1>
+        <img src="https://i.scdn.co/image/89adfd3c1ea983dc4f0efbf5ff26698252c76b0a" id="artist-banner">
+        <div id="artist-songs"></div>
+      </div>
     </div>
 
     <div id="container">
