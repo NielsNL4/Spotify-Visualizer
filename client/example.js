@@ -145,7 +145,7 @@ export default class Example extends Visualizer {
 
     ctx.restore()
 
-    ctx.font = "40px Montserrat regular";
+    ctx.font = "40px Montserrat, sans-serif";
     var txt = addDots(this.sync.songName, 20)
 
     document.title = this.sync.songName + ' by ' + this.sync.artistName
@@ -162,7 +162,7 @@ export default class Example extends Visualizer {
     ctx.fillStyle = '#FFF'
     ctx.fillText(txt, width / 2 - 290 + 600, height / 2 - 280 + 30);
 
-    ctx.font = "30px Montserrat regular";
+    ctx.font = "30px Montserrat, sans-serif";
     var txt = this.sync.artistName
 
     ctx.fillStyle = '#000'
